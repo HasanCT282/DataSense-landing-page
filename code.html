@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataSense | Find Data Errors. Fix Them with Proof.</title>
+  <meta name="description" content="DataSense is an AI-powered data quality platform that detects data errors, suggests ranked fixes with confidence scores, and enforces human-in-the-loop approvals with full multilingual Urdu/English support.">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="DataSense - Find Data Errors. Fix Them with Proof.">
+  <meta property="og:description" content="AI-assisted data cleaning, profiling, and quality monitoring for English and Urdu datasets.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon Data URI -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='100' y2='100'><stop offset='0%' stop-color='%2300f2fe'/><stop offset='100%' stop-color='%234facfe'/></linearGradient></defs><rect width='100' height='100' rx='24' fill='%230a0f1d'/><path d='M25 35h50M25 50h35M25 65h45' stroke='%231e293b' stroke-width='8' stroke-linecap='round'/><circle cx='65' cy='65' r='18' fill='none' stroke='url(%23g)' stroke-width='6'/><path d='M78 78l12 12' stroke='url(%23g)' stroke-width='6' stroke-linecap='round'/><path d='M58 65l5 5 10-10' stroke='%2310b981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fbfb',
+              100: '#d7f5f6',
+              500: '#00f2fe',
+              600: '#00c6ff',
+              700: '#0072ff',
+              dark: '#060913',
+              card: 'rgba(15, 23, 42, 0.65)',
+              border: 'rgba(255, 255, 255, 0.08)'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            urdu: ['Noto Nastaliq Urdu', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom CSS Styles & Utilities */
+    :root {
+      --bg-dark: #060913;
+      --text-main: #f8fafc;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* Glassmorphism effects */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-panel-light {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    /* Animated Gradients & Glows */
+    .text-gradient {
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #0072ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .shimmer-text {
+      background: linear-gradient(90deg, #00f2fe, #ffffff, #4facfe, #00f2fe);
+      background-size: 200% auto;
+      color: #000;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      to { background-position: 200% center; }
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Scan line animation */
+    @keyframes scanbeam {
+      0% { top: 0%; opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { top: 100%; opacity: 0.8; }
+    }
+
+    .scan-beam {
+      position: absolute;
+      left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, transparent, #00f2fe, #10b981, transparent);
+      box-shadow: 0 0 15px #00f2fe;
+      animation: scanbeam 3s ease-in-out infinite alternate;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #060913;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Light mode overwrites */
+    .light {
+      --bg-dark: #f8fafc;
+      --text-main: #0f172a;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .light .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(0,0,0,0.08);
+      color: #0f172a;
+    }
+    .light .bg-slate-900\/80, .light .bg-slate-950, .light .bg-slate-900 {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+    }
+    .light .text-slate-400 { color: #475569 !important; }
+    .light .text-slate-300 { color: #334155 !important; }
+    .light .border-slate-800 { border-color: #e2e8f0 !important; }
+
+    /* Motion accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased text-slate-100 selection:bg-cyan-500 selection:text-black">
+
+  <!-- Scroll Progress Bar -->
+  <div id="scroll-progress" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 z-50 transition-all duration-150 w-0"></div>
+
+  <!-- Background Ambient Glow Orbs -->
+  <div class="glow-orb w-[500px] h-[500px] bg-cyan-500 top-10 left-[-100px]"></div>
+  <div class="glow-orb w-[600px] h-[600px] bg-blue-600 top-[30%] right-[-150px]"></div>
+  <div class="glow-orb w-[400px] h-[400px] bg-indigo-600 top-[70%] left-[20%]"></div>
+
+  <!-- Sticky Glass Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-4 transition-all duration-300" id="navbar">
+    <div class="max-w-7xl mx-auto glass-panel rounded-2xl px-5 py-3 flex items-center justify-between shadow-2xl">
+      <!-- Logo -->
+      <a href="#home" class="flex items-center gap-3 group focus:outline-none" aria-label="DataSense Home">
+        <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100">
+              <stop offset="0%" stop-color="#00f2fe"/>
+              <stop offset="100%" stop-color="#4facfe"/>
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="24" fill="#0f172a"/>
+          <path d="M25 35h50M25 50h35M25 65h45" stroke="#334155" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="65" cy="65" r="18" fill="none" stroke="url(#logo-grad)" stroke-width="6"/>
+          <path d="M78 78l10 10" stroke="url(#logo-grad)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M58 65l5 5 10-10" stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="font-display font-bold text-xl tracking-tight text-white flex items-center gap-1.5">
+          DataSense
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">MVP</span>
+        </span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden lg:flex items-center space-x-6 text-sm font-medium text-slate-300" aria-label="Main Navigation">
+        <a href="#home" class="hover:text-cyan-400 transition-colors py-1 relative group">Home</a>
+        <a href="#about" class="hover:text-cyan-400 transition-colors py-1 relative group">About</a>
+        <a href="#vision" class="hover:text-cyan-400 transition-colors py-1 relative group">Vision</a>
+        <a href="#problem" class="hover:text-cyan-400 transition-colors py-1 relative group">Problem</a>
+        <a href="#solution" class="hover:text-cyan-400 transition-colors py-1 relative group">Solution</a>
+        <a href="#demo" class="hover:text-cyan-400 transition-colors py-1 relative group">Demo</a>
+        <a href="#products" class="hover:text-cyan-400 transition-colors py-1 relative group">Products</a>
+        <a href="#customers" class="hover:text-cyan-400 transition-colors py-1 relative group">Segments</a>
+        <a href="#how" class="hover:text-cyan-400 transition-colors py-1 relative group">Pipeline</a>
+        <a href="#team" class="hover:text-cyan-400 transition-colors py-1 relative group">Team</a>
+      </nav>
+
+      <!-- Right Action & Theme Toggle -->
+      <div class="hidden sm:flex items-center gap-3">
+        <button id="theme-toggle" aria-label="Toggle theme" class="p-2.5 rounded-xl border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 transition-all">
+          <svg id="theme-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="theme-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+        <a href="#contact" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-[1.02] transition-all duration-200">
+          Talk to Us
+        </a>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button id="mobile-menu-btn" class="lg:hidden p-2 text-slate-300 hover:text-white focus:outline-none" aria-label="Open mobile menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden lg:hidden max-w-7xl mx-auto mt-2 glass-panel rounded-2xl p-6 shadow-2xl flex-col space-y-4 text-center">
+      <a href="#home" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Home</a>
+      <a href="#about" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">About</a>
+      <a href="#vision" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Vision</a>
+      <a href="#problem" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Problem</a>
+      <a href="#solution" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Solution</a>
+      <a href="#demo" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Live Demo</a>
+      <a href="#products" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Products</a>
+      <a href="#customers" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Target Segments</a>
+      <a href="#how" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">How It Works</a>
+      <a href="#team" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Team</a>
+      <a href="#contact" class="mobile-link text-slate-200 hover:text-cyan-400 py-1">Contact</a>
+    </div>
+  </header>
+
+  <main class="relative z-10 pt-24">
+
+    <!-- 1. SECTION: HERO / HOME -->
+    <section id="home" class="min-h-[90vh] flex items-center justify-center px-4 sm:px-8 py-16 relative overflow-hidden">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Hero Text -->
+        <div class="lg:col-span-7 space-y-8 text-left">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            Student Venture · NED University Karachi (2026)
+          </div>
+
+          <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+            Find data errors. <br>
+            <span class="shimmer-text">Fix them with proof.</span>
+          </h1>
+
+          <p class="text-lg sm:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed">
+            DataSense flags structural errors, statistical anomalies, and mixed Urdu/English duplicates in your datasets. Get ranked fix suggestions with confidence scores and clear rationale—while keeping complete human control over every single approval.
+          </p>
+
+          <!-- Interactive Animated Typing Pill -->
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 font-mono text-sm text-slate-300 w-fit">
+            <span class="text-cyan-400 font-bold">&gt; Fixing:</span>
+            <span id="hero-typing" class="text-amber-400 min-w-[220px]">karachi → Karachi</span>
+          </div>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <a href="#demo" class="px-7 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-[1.02] transition-all flex items-center gap-2 group">
+              See it in action
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+            <a href="#contact" class="px-7 py-3.5 rounded-xl glass-panel text-white font-semibold hover:bg-slate-800/80 transition-all border border-slate-700/60">
+              Talk to us
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero Canvas Visual -->
+        <div class="lg:col-span-5 relative">
+          <div id="hero-card-container" class="glass-panel p-4 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden group">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs font-mono text-slate-400 px-2">
+              <span class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span> 
+                Live Node Scanner
+              </span>
+              <span id="fps-display" class="text-slate-500 font-mono text-[10px]">-- FPS</span>
+            </div>
+            
+            <canvas id="hero-canvas" class="w-full h-[360px] rounded-2xl mt-3 bg-slate-950/80" role="img" aria-label="Illustrative 6-stage data detection, linking, and auto-correction pipeline story demo"></canvas>
+
+            <div class="absolute bottom-6 left-6 right-6 p-3 rounded-xl glass-panel text-xs text-slate-300 flex justify-between items-center border border-cyan-500/30">
+              <span class="truncate pr-2"><strong class="text-slate-400">Status:</strong> <span id="hero-status-line" class="text-cyan-400 font-mono">1. Ingesting records...</span></span>
+              <div class="text-right shrink-0">
+                <div class="font-mono text-emerald-400 font-semibold text-sm">Quality Score: <span id="hero-quality-score">72%</span></div>
+                <div class="text-[9px] text-slate-400 uppercase tracking-widest font-mono">Sample data</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Marquee Strip -->
+    <div class="w-full bg-slate-900/50 border-y border-slate-800/80 py-4 overflow-hidden relative">
+      <div class="flex space-x-8 animate-[marquee_25s_linear_infinite] whitespace-nowrap text-xs uppercase font-mono tracking-widest text-slate-400">
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Fuzzy Duplicate Matching</span>
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Urdu Nastaliq Normalization</span>
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Schema Drift Detection</span>
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Statistical Outlier Profiling</span>
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Missing Value Imputation</span>
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Human-In-The-Loop Approval</span>
+        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Automated Proof Trails</span>
+      </div>
+    </div>
+
+    <!-- 2. SECTION: ABOUT THE COMPANY -->
+    <section id="about" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto">
+      <div class="glass-panel p-8 sm:p-12 rounded-3xl relative overflow-hidden border border-slate-800">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div class="lg:col-span-7 space-y-6">
+            <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">About DataSense</span>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Built by analysts, for teams tired of manual data firefighting.</h2>
+            <p class="text-slate-300 leading-relaxed">
+              We are three data science students at <strong>NED University of Engineering and Technology, Karachi</strong>. Working on analytics projects, we noticed that data analysts spend up to 80% of their time manually cleaning spreadsheets, fixing typos, and resolving duplicate entries before doing any real work.
+            </p>
+            <p class="text-slate-300 leading-relaxed">
+              Existing tools are either over-simplified spreadsheet macros or massive enterprise software requiring dedicated data engineering teams. Moreover, almost zero existing platforms natively understand <strong>mixed Urdu and English data</strong>—a pervasive issue in South Asian enterprises and local organisations. We built DataSense as the tool we wished we had.
+            </p>
+
+            <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 text-xs text-slate-400 flex items-start gap-3">
+              <svg class="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>
+                <strong>Student Venture Disclosure:</strong> DataSense is a student venture created for the course <em>Data Science Platform Architecture and Application (2026)</em> at NED University. It is not currently a registered company.
+              </span>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 grid grid-cols-1 gap-4">
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div class="text-3xl font-display font-bold text-cyan-400 mb-1">NED University</div>
+              <div class="text-sm font-medium text-slate-200">Karachi, Pakistan</div>
+              <p class="text-xs text-slate-400 mt-2">Incubated in academic coursework with a focus on real-world engineering deployment.</p>
+            </div>
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div class="text-3xl font-display font-bold text-emerald-400 mb-1">Dual Language</div>
+              <div class="text-sm font-medium text-slate-200">Urdu &amp; English First-Class Support</div>
+              <p class="text-xs text-slate-400 mt-2">Native phonetic and script matching for mixed Latin and Nastaliq record sets.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SECTION: VISION, MISSION AND OBJECTIVES -->
+    <section id="vision" class="py-20 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">Strategic Alignment</span>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Vision, Mission &amp; MVP Objectives</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Vision -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 relative group hover:border-cyan-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-6">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </div>
+          <h3 class="font-display text-2xl font-bold text-white mb-3">Our Vision</h3>
+          <p class="text-slate-300 leading-relaxed">
+            To make clean, trustworthy, and audit-ready data the default standard for every organization in South Asia and beyond, regardless of their engineering budget or language constraints.
+          </p>
+        </div>
+
+        <!-- Mission -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 relative group hover:border-cyan-500/40 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-6">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h3 class="font-display text-2xl font-bold text-white mb-3">Our Mission</h3>
+          <p class="text-slate-300 leading-relaxed">
+            To build intelligent, explainable data quality software that automatically detects errors, explains fixes in plain language with clear statistical proof, and respects human expertise through seamless approvals.
+          </p>
+        </div>
+      </div>
+
+      <!-- Objectives Grid -->
+      <div class="space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <h3 class="font-display text-xl font-bold text-white">Our Targets for the First Release</h3>
+          <span class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-slate-300">Target Metrics (Not Achievements)</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center space-y-2">
+            <div class="font-display text-4xl font-extrabold text-cyan-400 flex justify-center items-baseline">
+              <span class="count-up" data-target="90">0</span>%
+            </div>
+            <div class="text-sm font-semibold text-white">Benchmark Error Detection</div>
+            <p class="text-xs text-slate-400">Detect at least 90% of injected structural and value errors on benchmark datasets (target).</p>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center space-y-2">
+            <div class="font-display text-4xl font-extrabold text-emerald-400 flex justify-center items-baseline">
+              <span class="count-up" data-target="40">0</span>%
+            </div>
+            <div class="text-sm font-semibold text-white">Cleaning Speedup</div>
+            <p class="text-xs text-slate-400">Cut manual cleaning time by 40% vs a spreadsheet baseline in controlled user studies (target).</p>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center space-y-2">
+            <div class="font-display text-4xl font-extrabold text-amber-400 flex justify-center items-baseline">
+              &lt;<span class="count-up" data-target="10">0</span>%
+            </div>
+            <div class="text-sm font-semibold text-white">False Alarm Ceiling</div>
+            <p class="text-xs text-slate-400">Keep false-alarm rate under 10% across standard operational datasets (target).</p>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border border-slate-800 text-center space-y-2">
+            <div class="font-display text-4xl font-extrabold text-indigo-400 flex justify-center items-baseline">
+              0.<span class="count-up" data-target="85">0</span>
+            </div>
+            <div class="text-sm font-semibold text-white">Urdu/English Match F1</div>
+            <p class="text-xs text-slate-400">Achieve F1 score of 0.85+ on mixed Urdu and English near-duplicate matching (target).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SECTION: THE PROBLEM -->
+    <section id="problem" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-12">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-red-400 font-mono text-sm tracking-wider uppercase">The Unspoken Data Crisis</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">Bad data enters silently. <br>It fails loudly at report time.</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Narrative & Coping -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-red-500 border-slate-800 space-y-3">
+            <h3 class="font-display text-xl font-semibold text-white">What happens &amp; Where</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Inconsistent entries like <code class="bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded">Karachi</code>, <code class="bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded">karachi</code>, <code class="bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded">KHI</code>, and <code class="bg-slate-800 text-amber-300 px-1.5 py-0.5 rounded font-urdu">کراچی</code> sneak into systems during manual data entry, system exports, or spreadsheet consolidation.
+            </p>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-amber-500 border-slate-800 space-y-3">
+            <h3 class="font-display text-xl font-semibold text-white">Why it matters</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Decisions are made on aggregated numbers. When regional entries fail to combine due to typos or script differences, executive dashboards skew, inventory counts drift, and reports lose stakeholder trust.
+            </p>
+          </div>
+
+          <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-blue-500 border-slate-800 space-y-3">
+            <h3 class="font-display text-xl font-semibold text-white">How teams cope today (and why it breaks)</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Teams rely on manual spreadsheet filtering, fragile Python scripts, or enterprise tools that require specialized data engineering teams. These approaches are slow, lack repair rationale, and completely ignore mixed-script Urdu text.
+            </p>
+          </div>
+        </div>
+
+        <!-- Animated Messy Data Visual -->
+        <div class="lg:col-span-6">
+          <div class="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4 relative">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-400 pb-2 border-b border-slate-800">
+              <span class="text-red-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Raw Ingest Stream</span>
+              <span>Errors Detected: 4</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs font-mono">
+                <thead>
+                  <tr class="text-slate-400 border-b border-slate-800">
+                    <th class="p-2">ID</th>
+                    <th class="p-2">Customer Name</th>
+                    <th class="p-2">City</th>
+                    <th class="p-2">Phone</th>
+                    <th class="p-2">Issue Type</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/50">
+                  <tr class="bg-red-500/10 text-red-200">
+                    <td class="p-2">101</td>
+                    <td class="p-2">Usman Khan</td>
+                    <td class="p-2 font-urdu text-sm">کراچی</td>
+                    <td class="p-2">03001234567</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400">Mixed Script</span></td>
+                  </tr>
+                  <tr class="bg-amber-500/10 text-amber-200">
+                    <td class="p-2">102</td>
+                    <td class="p-2">Ayesha Ali</td>
+                    <td class="p-2">karachi</td>
+                    <td class="p-2">0300-1234567</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">Casing Fix</span></td>
+                  </tr>
+                  <tr class="bg-red-500/10 text-red-200">
+                    <td class="p-2">103</td>
+                    <td class="p-2">Bilal Sheikh</td>
+                    <td class="p-2">KHI</td>
+                    <td class="p-2">3001234567</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400">Abbreviation</span></td>
+                  </tr>
+                  <tr class="bg-red-500/10 text-red-200">
+                    <td class="p-2">104</td>
+                    <td class="p-2">Saima Raza</td>
+                    <td class="p-2">Lahore</td>
+                    <td class="p-2">0321999999999</td>
+                    <td class="p-2"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400">Digit Length</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Qualitative Pain Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+          <div class="text-xs font-mono text-cyan-400">[EDIT: cite source / interview finding]</div>
+          <h4 class="text-base font-semibold text-white">Spreadsheet Fatigue</h4>
+          <p class="text-xs text-slate-300">Analysts report spending 60–80% of weekly working hours manually filtering, deduplicating, and reformatting raw spreadsheets.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+          <div class="text-xs font-mono text-cyan-400">[EDIT: cite source / interview finding]</div>
+          <h4 class="text-base font-semibold text-white">Urdu Script Erasure</h4>
+          <p class="text-xs text-slate-300">Standard ETL pipelines fail to align Nastaliq or Romanized Urdu records, causing high rates of duplicate customer profiles.</p>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+          <div class="text-xs font-mono text-cyan-400">[EDIT: cite source / interview finding]</div>
+          <h4 class="text-base font-semibold text-white">Blind Automated Overwrites</h4>
+          <p class="text-xs text-slate-300">Black-box auto-clean scripts frequently overwrite valid edge cases without storing audit trails or explaining their rationale.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SECTION: OUR SOLUTION -->
+    <section id="solution" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-emerald-400 font-mono text-sm tracking-wider uppercase">The Intelligent Solution</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">Automated AI Detection. <br>Human Proof &amp; Control.</h2>
+      </div>
+
+      <!-- Before & After Interactive Slider -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display text-lg font-bold text-white">Interactive Transformation Preview</h3>
+          <span class="text-xs text-slate-400 font-mono">Drag slider to compare raw vs clean</span>
+        </div>
+
+        <div id="before-after-container" class="relative h-[320px] rounded-3xl overflow-hidden glass-panel border border-slate-800 select-none">
+          <!-- After Layer (Clean Data) -->
+          <div class="absolute inset-0 bg-slate-950 p-6 overflow-hidden">
+            <div class="text-xs font-mono text-emerald-400 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Cleaned &amp; Normalized Output
+            </div>
+            <table class="w-full text-left text-xs font-mono">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-800">
+                  <th class="p-2">Name</th><th class="p-2">City</th><th class="p-2">Phone</th><th class="p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/50">
+                <tr class="bg-emerald-500/10 text-emerald-200">
+                  <td class="p-2">Usman Khan</td><td class="p-2">Karachi</td><td class="p-2">+92 300 1234567</td><td class="p-2">✓ Normalized from Urdu</td>
+                </tr>
+                <tr class="bg-emerald-500/10 text-emerald-200">
+                  <td class="p-2">Ayesha Ali</td><td class="p-2">Karachi</td><td class="p-2">+92 300 1234567</td><td class="p-2">✓ Titlecase applied</td>
+                </tr>
+                <tr class="bg-emerald-500/10 text-emerald-200">
+                  <td class="p-2">Bilal Sheikh</td><td class="p-2">Karachi</td><td class="p-2">+92 300 1234567</td><td class="p-2">✓ Standardized Abbr</td>
+                </tr>
+                <tr class="bg-emerald-500/10 text-emerald-200">
+                  <td class="p-2">Saima Raza</td><td class="p-2">Lahore</td><td class="p-2">+92 321 9999999</td><td class="p-2">✓ Digit Trimmed</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Before Layer (Messy Data) -->
+          <div id="before-layer" class="absolute inset-y-0 left-0 bg-slate-900/95 p-6 overflow-hidden border-r-2 border-cyan-400 w-1/2">
+            <div class="text-xs font-mono text-red-400 mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span> Messy Raw Input
+            </div>
+            <table class="w-full text-left text-xs font-mono min-w-[600px]">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-800">
+                  <th class="p-2">Name</th><th class="p-2">City</th><th class="p-2">Phone</th><th class="p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/50">
+                <tr class="bg-red-500/20 text-red-200">
+                  <td class="p-2">Usman Khan</td><td class="p-2 font-urdu">کراچی</td><td class="p-2">03001234567</td><td class="p-2">⚠ Non-Latin Script</td>
+                </tr>
+                <tr class="bg-amber-500/20 text-amber-200">
+                  <td class="p-2">Ayesha Ali</td><td class="p-2">karachi</td><td class="p-2">0300-1234567</td><td class="p-2">⚠ Lowercase City</td>
+                </tr>
+                <tr class="bg-red-500/20 text-red-200">
+                  <td class="p-2">Bilal Sheikh</td><td class="p-2">KHI</td><td class="p-2">3001234567</td><td class="p-2">⚠ Non-standard Code</td>
+                </tr>
+                <tr class="bg-red-500/20 text-red-200">
+                  <td class="p-2">Saima Raza</td><td class="p-2">Lahore</td><td class="p-2">0321999999999</td><td class="p-2">⚠ Malformed Length</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Handle -->
+          <input type="range" min="0" max="100" value="50" id="before-after-slider" class="absolute inset-0 opacity-0 cursor-ew-resize w-full h-full z-30" aria-label="Before and after comparison slider">
+        </div>
+      </div>
+
+      <!-- Three Pillars -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xl">1</div>
+          <h3 class="font-display text-xl font-bold text-white">Detect</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">ML-based anomaly detection models learn normal statistical distributions and column contexts to spot subtle, domain-specific errors rules miss.</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xl">2</div>
+          <h3 class="font-display text-xl font-bold text-white">Suggest</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Generates ranked fix proposals accompanied by a calculated confidence score (e.g. 96% Match) and plain-language reasoning.</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xl">3</div>
+          <h3 class="font-display text-xl font-bold text-white">Prove</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Full impact preview before changes apply. Nothing changes without explicit human approval, leaving a transparent audit trail.</p>
+        </div>
+      </div>
+
+      <!-- Why DS Box -->
+      <div class="glass-panel p-8 rounded-3xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/20 to-blue-950/20 flex flex-col md:flex-row items-center gap-6">
+        <div class="p-4 rounded-2xl bg-cyan-500/10 text-cyan-400 shrink-0">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <div>
+          <h4 class="font-display text-lg font-bold text-white">Why Data Science is Needed</h4>
+          <p class="text-sm text-slate-300 leading-relaxed mt-1">
+            Static regex rules cannot catch context-dependent mistakes or phonetic Urdu/English duplicates (e.g. matching "Karachi" with "کراچی"). Machine learning models learn normal distribution patterns per column, vectorizing text to calculate semantic proximity and flag true anomalies.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. SECTION: PRODUCT DEMO (INTERACTIVE) -->
+    <section id="demo" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-mono mb-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Interactive demo · sample data
+          </div>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Try DataSense Live Studio</h2>
+        </div>
+        <!-- 3-Tab View Buttons -->
+        <div class="flex bg-slate-900 p-1.5 rounded-2xl border border-slate-800 self-start">
+          <button id="tab-scan-btn" class="px-5 py-2 rounded-xl text-xs font-semibold transition-all bg-cyan-500 text-slate-950 shadow">Quality Scan</button>
+          <button id="tab-monitor-btn" class="px-5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all">Monitor View</button>
+          <button id="tab-report-btn" class="px-5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all">Health Report</button>
+        </div>
+      </div>
+
+      <!-- App Window Mockup -->
+      <div class="glass-panel rounded-3xl border border-slate-800 overflow-hidden shadow-2xl relative">
+        <!-- Window Chrome Bar -->
+        <div class="bg-slate-900/90 px-6 py-3 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+            <span class="ml-4 font-mono text-xs text-slate-400">datasense-workspace / customer_enrollment_2026.csv</span>
+          </div>
+          <button id="btn-run-scan" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-semibold text-xs hover:scale-[1.02] transition-all flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+            Run Quality Scan
+          </button>
+        </div>
+
+        <!-- Scanning Beam Animation Overlay -->
+        <div id="demo-scan-beam" class="scan-beam hidden"></div>
+
+        <!-- TAB 1: SCAN VIEW -->
+        <div id="demo-view-scan" class="p-6 space-y-6">
+          <!-- Summary Counters -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div class="text-xs text-slate-400">Total Rows</div>
+              <div class="text-2xl font-display font-bold text-white mt-1" id="stat-rows">12</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div class="text-xs text-slate-400">Columns</div>
+              <div class="text-2xl font-display font-bold text-white mt-1">5</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div class="text-xs text-slate-400">Issues Flagged</div>
+              <div class="text-2xl font-display font-bold text-amber-400 mt-1" id="stat-issues">4</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <div class="text-xs text-slate-400">Data Health Score</div>
+              <div class="text-2xl font-display font-bold text-cyan-400 mt-1" id="stat-score">72%</div>
+            </div>
+          </div>
+
+          <!-- Grid & Inspector Layout -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Table View -->
+            <div class="lg:col-span-8 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/60">
+              <table class="w-full text-left text-xs font-mono min-w-[500px]" id="demo-table">
+                <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th class="p-3">ID</th><th class="p-3">Name</th><th class="p-3">City</th><th class="p-3">Phone</th><th class="p-3">Reg. Date</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60" id="demo-tbody">
+                  <!-- JS dynamically populates sample rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Fix With Proof Inspector Panel -->
+            <div class="lg:col-span-4 rounded-2xl border border-slate-800 bg-slate-900/80 p-5 space-y-4" id="proof-panel">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h4 class="font-display text-sm font-bold text-white flex items-center gap-2">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Fix with Proof Panel
+                </h4>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400" id="proof-status">Select Issue</span>
+              </div>
+
+              <div id="proof-content" class="space-y-4 text-xs">
+                <p class="text-slate-400 italic">Click any highlighted row in the dataset table to inspect automated ML proof and approve suggestions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: MONITOR VIEW -->
+        <div id="demo-view-monitor" class="p-6 space-y-6 hidden">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display text-lg font-bold text-white">Stream Drift &amp; Schema Monitor</h3>
+            <span class="text-xs text-emerald-400 font-mono">● Live Feed Connected</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+              <div class="text-xs text-slate-400 flex justify-between">
+                <span>Distribution Drift Index (7-Day Rolling)</span>
+                <span class="text-cyan-400 font-mono">Normal Variance</span>
+              </div>
+              <div class="h-44 flex items-end gap-2 pt-6">
+                <div class="w-1/12 bg-slate-800 h-[30%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[45%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[35%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[60%] rounded-t"></div>
+                <div class="w-1/12 bg-cyan-500 h-[80%] rounded-t animate-pulse"></div>
+                <div class="w-1/12 bg-slate-800 h-[40%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[50%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[30%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[65%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[55%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[40%] rounded-t"></div>
+                <div class="w-1/12 bg-slate-800 h-[35%] rounded-t"></div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+              <h4 class="text-sm font-semibold text-white">Active Alerts</h4>
+              <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
+                <div class="font-bold">Schema Drift Warning</div>
+                <div>Column <code class="bg-amber-950 px-1 rounded">Phone</code> format changed to string from int64 in batch #402.</div>
+              </div>
+              <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-300 space-y-1">
+                <div class="font-bold font-mono">Urdu Script Ingestion</div>
+                <div>Incoming stream contains 14% non-Latin Nastaliq records. Auto-routing to Text Cleaner module.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: REPORT VIEW -->
+        <div id="demo-view-report" class="p-6 space-y-6 hidden">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h3 class="font-display text-lg font-bold text-white">Dataset Quality Health Certificate</h3>
+              <p class="text-xs text-slate-400">Generated on demand by DataSense Engine</p>
+            </div>
+            <button class="px-4 py-2 rounded-xl bg-slate-800 text-xs text-slate-300 hover:text-white border border-slate-700">Download Audit PDF (Mock)</button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-panel p-6 rounded-2xl text-center space-y-3">
+              <div class="text-xs text-slate-400">Final Health Score</div>
+              <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path class="text-slate-800" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="text-emerald-400" stroke-dasharray="98, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+                <span class="absolute text-xl font-bold font-display text-emerald-400">98%</span>
+              </div>
+            </div>
+
+            <div class="md:col-span-2 glass-panel p-6 rounded-2xl space-y-3 text-xs">
+              <h4 class="font-semibold text-white">Repair Audit Trail Summary</h4>
+              <ul class="space-y-2 text-slate-300 font-mono">
+                <li class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                  <span>Urdu Nastaliq Normalized: 'کراچی' → 'Karachi'</span>
+                  <span class="text-emerald-400">APPROVED</span>
+                </li>
+                <li class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                  <span>Abbreviation Resolution: 'KHI' → 'Karachi'</span>
+                  <span class="text-emerald-400">APPROVED</span>
+                </li>
+                <li class="flex items-center justify-between">
+                  <span>Phone Length Trim: 13 Digits → Standard 11</span>
+                  <span class="text-emerald-400">APPROVED</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. SECTION: PRODUCTS AND SERVICES -->
+    <section id="products" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">Core Engine Capabilities</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">Products &amp; Feature Suite</h2>
+      </div>
+
+      <!-- 5 Core Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-cyan-500/40 transition-all space-y-4 group">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">01</div>
+          <h3 class="font-display text-xl font-bold text-white">Quality Scan</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Automated profiling that ingests CSV/SQL data, computes statistical distributions, and detects structural anomalies and null clusters.</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-cyan-500/40 transition-all space-y-4 group">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">02</div>
+          <h3 class="font-display text-xl font-bold text-white">Smart Repair Suggestions</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Generates ranked fix proposals with individual confidence scores and plain-language explanations of why a change is recommended.</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-cyan-500/40 transition-all space-y-4 group">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">03</div>
+          <h3 class="font-display text-xl font-bold text-white">Quality Monitor</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Continuous stream and batch monitoring that sends automated alerts when distribution drift or unexpected schema changes occur.</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-cyan-500/40 transition-all space-y-4 group">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">04</div>
+          <h3 class="font-display text-xl font-bold text-white">Text-Field Cleaner</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Specialized transliteration and near-duplicate matching for mixed English and Urdu text, removing script barrier redundancy.</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 hover:border-cyan-500/40 transition-all space-y-4 group md:col-span-2 lg:col-span-1">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">05</div>
+          <h3 class="font-display text-xl font-bold text-white">Quality Report &amp; Dashboard</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">Comprehensive health summaries, exportable audit certificates, and line-item logs detailing every approved data modification.</p>
+        </div>
+      </div>
+
+      <!-- Differentiator Banner: Fix with Proof -->
+      <div class="glass-panel p-8 sm:p-10 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/40 via-slate-900 to-blue-950/40 space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-mono font-bold">
+          Key Differentiator
+        </div>
+        <h3 class="font-display text-2xl sm:text-3xl font-bold text-white">"Fix with Proof" Philosophy</h3>
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl">
+          Unlike black-box automated tools that silently overwrite database records, DataSense provides an impact preview, a confidence score, and clear reasons for every single proposed fix. <strong>Nothing changes in your underlying database without explicit human approval.</strong>
+        </p>
+      </div>
+
+      <!-- Roadmap Row -->
+      <div class="space-y-4">
+        <h4 class="text-sm font-mono text-slate-400 uppercase tracking-wider">Future Roadmap (Post-MVP Build)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/60 opacity-75">
+            <div class="text-xs font-semibold text-white">REST API &amp; SDK Access</div>
+            <p class="text-[11px] text-slate-400 mt-1">Programmatic webhook &amp; Python SDK endpoints for data pipeline integration.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/60 opacity-75">
+            <div class="text-xs font-semibold text-white">Expanded Regional Script Support</div>
+            <p class="text-[11px] text-slate-400 mt-1">Extending transliteration models to Sindhi, Pashto, and Arabic typography.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/60 opacity-75">
+            <div class="text-xs font-semibold text-white">Collaborative Workspaces</div>
+            <p class="text-[11px] text-slate-400 mt-1">Multi-user role-based permissions and team review queues for enterprise data leads.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. SECTION: WHO WE BUILD FOR (CUSTOMERS) -->
+    <section id="customers" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">Target Segments</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">Our Target Customers</h2>
+        <p class="text-sm text-slate-400">We are validating these segments through active user interviews and industry research.</p>
+      </div>
+
+      <!-- 4 Segment Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Segment 1 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">Data Analysts &amp; Staff</h3>
+              <span class="text-xs text-cyan-400 font-mono">Primary Operational Users</span>
+            </div>
+          </div>
+          <div class="text-xs space-y-2 text-slate-300">
+            <div><strong>Situation:</strong> Preparing weekly operational reports and customer logs.</div>
+            <div><strong>Pain:</strong> Hours spent fixing typos, duplicate entries, and inconsistent casing in Excel.</div>
+            <div><strong>How DataSense Helps:</strong> Automated scanning and 1-click approvals eliminate manual fixing.</div>
+          </div>
+        </div>
+
+        <!-- Segment 2 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">Small &amp; Mid-Size Businesses</h3>
+              <span class="text-xs text-blue-400 font-mono">Commercial Buyers</span>
+            </div>
+          </div>
+          <div class="text-xs space-y-2 text-slate-300">
+            <div><strong>Situation:</strong> Managing growing CRM databases and multi-channel sales records.</div>
+            <div><strong>Pain:</strong> Inconsistent records cause failed customer communications and duplicate shipping.</div>
+            <div><strong>How DataSense Helps:</strong> Continuous background quality monitoring ensures clean CRM data.</div>
+          </div>
+        </div>
+
+        <!-- Segment 3 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">University Departments</h3>
+              <span class="text-xs text-emerald-400 font-mono">Institutional Buyers &amp; Users</span>
+            </div>
+          </div>
+          <div class="text-xs space-y-2 text-slate-300">
+            <div><strong>Situation:</strong> Processing large student enrollment, grading, and administrative archives.</div>
+            <div><strong>Pain:</strong> Mixed Urdu and English student records lead to duplicate student IDs and lost files.</div>
+            <div><strong>How DataSense Helps:</strong> Native bilingual matching unifies English and Nastaliq student profiles.</div>
+          </div>
+        </div>
+
+        <!-- Segment 4 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">NGOs &amp; Early-Stage Startups</h3>
+              <span class="text-xs text-amber-400 font-mono">Resource-Constrained Teams</span>
+            </div>
+          </div>
+          <div class="text-xs space-y-2 text-slate-300">
+            <div><strong>Situation:</strong> Managing field survey data and rapid user signups without dedicated engineers.</div>
+            <div><strong>Pain:</strong> Cannot afford complex enterprise data quality platforms or data engineers.</div>
+            <div><strong>How DataSense Helps:</strong> No-code web studio empowers non-technical staff to maintain high quality.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users vs Paying Note & Interview Insights -->
+      <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <div class="text-xs text-slate-300">
+          <strong class="text-white">Note on Users vs. Paying Customers:</strong> Operational analysts and university administrative staff represent our core hands-on users, whereas business owners and institutional department heads represent our primary economic buyers.
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+            <!-- <span class="text-cyan-400 font-mono block mb-1">[EDIT: interview insight 1]</span> -->
+            <p class="text-slate-400">"We spend 3 days every month manually merging branch office spreadsheets before board reporting."</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+            <!-- <span class="text-cyan-400 font-mono block mb-1">[EDIT: interview insight 2]</span> -->
+            <p class="text-slate-400">"Urdu address entries typed in Roman script vs Nastaliq create duplicate records in our system."</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+            <!-- <span class="text-cyan-400 font-mono block mb-1">[EDIT: interview insight 3]</span> -->
+            <p class="text-slate-400">"We don't trust black-box automated scripts because they occasionally wipe out valid edge-case data."</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. SECTION: HOW IT WORKS -->
+    <section id="how" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">Execution Workflow</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">How DataSense Works</h2>
+      </div>
+
+      <!-- 5-Step Pipeline Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3 relative group hover:border-cyan-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center font-mono">01</div>
+          <h3 class="font-display text-base font-bold text-white">Connect Data</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Upload CSV/Excel or connect SQL/REST endpoints in seconds.</p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3 relative group hover:border-cyan-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center font-mono">02</div>
+          <h3 class="font-display text-base font-bold text-white">Scan</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">ML models profile statistics, distributions, and script typos.</p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3 relative group hover:border-cyan-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center font-mono">03</div>
+          <h3 class="font-display text-base font-bold text-white">Review Suggestions</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Inspect confidence scores and plain-language reasons.</p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3 relative group hover:border-cyan-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center font-mono">04</div>
+          <h3 class="font-display text-base font-bold text-white">Approve with Proof</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Accept or reject proposals with 1-click human verification.</p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3 relative group hover:border-cyan-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center font-mono">05</div>
+          <h3 class="font-display text-base font-bold text-white">Monitor</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Receive live continuous drift alerts on future ingest streams.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. SECTION: TEAM -->
+    <section id="team" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">Founding Team</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">Meet the Founders</h2>
+        <p class="text-sm text-slate-400">Data Science &amp; Engineering Undergraduates at NED University of Engineering and Technology</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Founder 1 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-6 flex flex-col justify-between group hover:border-cyan-500/40 transition-all">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold text-xl flex items-center justify-center">MHA</div>
+              <span class="text-xs font-mono text-slate-400">Student ID: CT-24282</span>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">Muhammad Hasan Arslan</h3>
+              <p class="text-xs text-cyan-400 font-semibold mt-0.5">CEO &amp; Chief Platform Architect</p>
+            </div>
+            <p class="text-xs text-slate-300 italic">
+              "Building trustworthy data infrastructure that seamlessly merges high-performance architecture with human explainability."
+            </p>
+            <div class="flex flex-wrap gap-1.5 pt-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Data Platform Architecture</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Machine Learning</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Python</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">SQL</span>
+            </div>
+            <div class="space-y-1 text-xs text-slate-300 pt-2 border-t border-slate-800">
+              <strong class="text-white block">Concrete Responsibilities &amp; Deliverables:</strong>
+              <ul class="list-disc list-inside space-y-1 text-slate-400">
+                <li>Designs the ingestion and storage layer.</li>
+                <li>Architects core pipeline execution engine.</li>
+                <li>Expected Deliverable: Core streaming &amp; batch processing pipeline.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-800/60 flex items-center gap-3 text-xs text-slate-400">
+            <a href="[EDIT: LinkedIn]" class="hover:text-cyan-400 transition-colors">LinkedIn</a> ·
+            <a href="[EDIT: GitHub]" class="hover:text-cyan-400 transition-colors">GitHub</a>
+          </div>
+        </div>
+
+        <!-- Founder 2 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-6 flex flex-col justify-between group hover:border-cyan-500/40 transition-all">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-xl flex items-center justify-center">AA</div>
+              <span class="text-xs font-mono text-slate-400">Student ID: CT-24273</span>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">Arqam Affaf</h3>
+              <p class="text-xs text-blue-400 font-semibold mt-0.5">Chief Data Officer &amp; CFO</p>
+            </div>
+            <p class="text-xs text-slate-300 italic">
+              "Transforming messy operational datasets into quantifiable, audit-ready financial and business value."
+            </p>
+            <div class="flex flex-wrap gap-1.5 pt-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Data Profiling</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">SQL &amp; Python</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Cost &amp; Revenue Modelling</span>
+            </div>
+            <div class="space-y-1 text-xs text-slate-300 pt-2 border-t border-slate-800">
+              <strong class="text-white block">Concrete Responsibilities &amp; Deliverables:</strong>
+              <ul class="list-disc list-inside space-y-1 text-slate-400">
+                <li>Builds the cost model and pricing plan.</li>
+                <li>Leads data profiling and benchmark tests.</li>
+                <li>Expected Deliverable: Financial model &amp; data validation benchmarks.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-800/60 flex items-center gap-3 text-xs text-slate-400">
+            <a href="[EDIT: LinkedIn]" class="hover:text-cyan-400 transition-colors">LinkedIn</a> ·
+            <a href="[EDIT: GitHub]" class="hover:text-cyan-400 transition-colors">GitHub</a>
+          </div>
+        </div>
+
+        <!-- Founder 3 -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-6 flex flex-col justify-between group hover:border-cyan-500/40 transition-all">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xl flex items-center justify-center">MAA</div>
+              <span class="text-xs font-mono text-slate-400">Student ID: CT-24126</span>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold text-white">Muhammad Ammar Awan</h3>
+              <p class="text-xs text-emerald-400 font-semibold mt-0.5">CTO &amp; Lead Data Scientist</p>
+            </div>
+            <p class="text-xs text-slate-300 italic">
+              "Pioneering specialized anomaly detection algorithms tailored for complex multi-script environments."
+            </p>
+            <div class="flex flex-wrap gap-1.5 pt-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Machine Learning</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Anomaly Detection</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Model Evaluation</span>
+            </div>
+            <div class="space-y-1 text-xs text-slate-300 pt-2 border-t border-slate-800">
+              <strong class="text-white block">Concrete Responsibilities &amp; Deliverables:</strong>
+              <ul class="list-disc list-inside space-y-1 text-slate-400">
+                <li>Trains and evaluates the anomaly detector.</li>
+                <li>Develops Urdu/English fuzzy matching algorithms.</li>
+                <li>Expected Deliverable: ML detection models &amp; F1 evaluation reports.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-800/60 flex items-center gap-3 text-xs text-slate-400">
+            <a href="[EDIT: LinkedIn]" class="hover:text-cyan-400 transition-colors">LinkedIn</a> ·
+            <a href="[EDIT: GitHub]" class="hover:text-cyan-400 transition-colors">GitHub</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. SECTION: CONTACT -->
+    <section id="contact" class="py-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-12">
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <span class="text-cyan-400 font-mono text-sm tracking-wider uppercase">Get In Touch</span>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold text-white">Start Building Clean Data</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <!-- Formspree Working Form -->
+        <div class="lg:col-span-7 glass-panel p-8 rounded-3xl border border-slate-800">
+          <form action="https://formspree.io/f/xgakodda" method="POST" id="contact-form" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label for="name" class="text-xs font-semibold text-slate-300">Your Name</label>
+                <input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-cyan-500 transition-colors" placeholder="e.g. Sara Ahmed">
+              </div>
+              <div class="space-y-2">
+                <label for="email" class="text-xs font-semibold text-slate-300">Email Address</label>
+                <input type="email" id="email" name="email" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-cyan-500 transition-colors" placeholder="sara@company.com">
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="organization" class="text-xs font-semibold text-slate-300">Organization / Department</label>
+              <input type="text" id="organization" name="organization" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-cyan-500 transition-colors" placeholder="NED University / Tech Corp">
+            </div>
+
+            <div class="space-y-2">
+              <label for="message" class="text-xs font-semibold text-slate-300">Message / Data Inquiry</label>
+              <textarea id="message" name="message" rows="4" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-cyan-500 transition-colors resize-none" placeholder="Tell us about your data cleaning challenges or research collaboration..."></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-semibold text-sm hover:shadow-lg hover:shadow-cyan-500/25 transition-all">
+              Send Message
+            </button>
+
+            <!-- Inline States -->
+            <div id="form-success" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-medium text-center">
+              ✓ Message sent successfully! We will get back to you shortly.
+            </div>
+            <div id="form-error" class="hidden p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 font-medium text-center">
+              ✕ Something went wrong. Please check your form or use direct email fallback below.
+            </div>
+          </form>
+        </div>
+
+        <!-- Direct Contact Details -->
+        <div class="lg:col-span-5 glass-panel p-8 rounded-3xl border border-slate-800 space-y-6 flex flex-col justify-between">
+          <div class="space-y-6">
+            <h3 class="font-display text-xl font-bold text-white">Direct Contacts</h3>
+            
+            <div class="space-y-4 text-xs">
+              <div>
+                <span class="text-slate-400 block mb-1">Team Email Address:</span>
+                <a href="mailto:hasanarsalan781@gmail.com" class="text-cyan-400 font-mono text-sm underline hover:text-cyan-300">hasanarsalan781@gmail.com</a>
+              </div>
+
+              <div class="pt-4 border-t border-slate-800 space-y-2">
+                <span class="text-slate-400 block">Founder Phone Contacts:</span>
+                <div class="text-slate-300 font-mono">Muhammad Hasan Arslan: <span class="text-white">0305-7059468</span></div>
+                <div class="text-slate-300 font-mono">Arqam Affaf: <span class="text-white">0310-8283007</span></div>
+                <div class="text-slate-300 font-mono">Muhammad Ammar Awan: <span class="text-white">0371-1011991</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs text-slate-400">
+            <strong>Office Location:</strong> Department of Computer Science, NED University of Engineering and Technology, University Road, Karachi - 75270, Pakistan.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 12. SECTION: FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-12 px-4 sm:px-8 relative z-10 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <span class="font-display font-bold text-white text-base">DataSense</span>
+        <span>© 2026 DataSense. All rights reserved.</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-6 font-medium">
+        <a href="#home" class="hover:text-cyan-400 transition-colors">Home</a>
+        <a href="#about" class="hover:text-cyan-400 transition-colors">About</a>
+        <a href="#vision" class="hover:text-cyan-400 transition-colors">Vision</a>
+        <a href="#demo" class="hover:text-cyan-400 transition-colors">Demo</a>
+        <a href="#team" class="hover:text-cyan-400 transition-colors">Team</a>
+        <a href="#contact" class="hover:text-cyan-400 transition-colors">Contact</a>
+      </div>
+
+      <div class="text-center md:text-right text-[11px] text-slate-400 max-w-sm">
+        DataSense is a student venture from NED University of Engineering and Technology, Karachi (Course: Data Science Platform Architecture and Application, 2026). Not a registered company.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Vanilla JavaScript Code Engine -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* --- 1. Theme Toggle & Local Storage Guard --- */
+      const themeBtn = document.getElementById('theme-toggle');
+      const sunIcon = document.getElementById('theme-sun');
+      const moonIcon = document.getElementById('theme-moon');
+
+      try {
+        const savedTheme = localStorage.getItem('datasense_theme');
+        if (savedTheme === 'light') {
+          document.documentElement.classList.add('light');
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        }
+      } catch (e) {
+        console.warn('LocalStorage restricted or unavailable.');
+      }
+
+      themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('light');
+        const isLight = document.documentElement.classList.contains('light');
+        sunIcon.classList.toggle('hidden', !isLight);
+        moonIcon.classList.toggle('hidden', isLight);
+        try {
+          localStorage.setItem('datasense_theme', isLight ? 'light' : 'dark');
+        } catch (e) {}
+      });
+
+      /* --- 2. Mobile Menu Toggle --- */
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        mobileMenu.classList.toggle('flex');
+      });
+      document.querySelectorAll('.mobile-link').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+          mobileMenu.classList.remove('flex');
+        });
+      });
+
+      /* --- 3. Scroll Progress Indicator --- */
+      window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById('scroll-progress').style.width = scrolled + '%';
+      });
+
+      /* --- 4. Hero Animated Story-Driven Data Quality Canvas --- */
+      const canvas = document.getElementById('hero-canvas');
+      const statusLine = document.getElementById('hero-status-line');
+      const qualityScoreElem = document.getElementById('hero-quality-score');
+      const fpsDisplay = document.getElementById('fps-display');
+      const cardContainer = document.getElementById('hero-card-container');
+
+      if (canvas && canvas.getContext) {
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+
+        let width = 0;
+        let height = 0;
+        let isTabActive = true;
+        let isOffScreen = false;
+        let animationFrameId = null;
+
+        // Mouse Parallax & Cursor Proximity
+        let mouseX = -1000, mouseY = -1000;
+        let tiltX = 0, tiltY = 0;
+        let targetTiltX = 0, targetTiltY = 0;
+
+        if (cardContainer) {
+          cardContainer.addEventListener('mousemove', (e) => {
+            const rect = cardContainer.getBoundingClientRect();
+            const relX = e.clientX - rect.left;
+            const relY = e.clientY - rect.top;
+            mouseX = relX;
+            mouseY = relY;
+            targetTiltX = ((relX / rect.width) - 0.5) * 0.15;
+            targetTiltY = ((relY / rect.height) - 0.5) * -0.15;
+          });
+          cardContainer.addEventListener('mouseleave', () => {
+            mouseX = -1000;
+            mouseY = -1000;
+            targetTiltX = 0;
+            targetTiltY = 0;
+          });
+        }
+
+        // Drifting Background Particles
+        const particles = Array.from({ length: 24 }, () => ({
+          x: Math.random(),
+          y: Math.random(),
+          size: Math.random() * 1.5 + 0.5,
+          speed: Math.random() * 0.0003 + 0.0001,
+          alpha: Math.random() * 0.4 + 0.1
+        }));
+
+        // Sample Cells for the ~12s Story Loop
+        const initialRawCells = [
+          { raw: "karachi", fix: "Karachi", tag: "bad casing", isBad: true, matchWith: 3 },
+          { raw: "0321-9999", fix: "0321-9999", tag: null, isBad: false },
+          { raw: "2026-13-45", fix: "2026-03-15", tag: "bad format", isBad: true },
+          { raw: "کراچی", fix: "Karachi", tag: "duplicate", isBad: true, matchWith: 0 },
+          { raw: "Lahore", fix: "Lahore", tag: null, isBad: false },
+          { raw: "NULL", fix: "Islamabad", tag: "missing", isBad: true },
+          { raw: "KHI", fix: "Karachi", tag: "abbreviation", isBad: true, matchWith: 0 },
+          { raw: "999999", fix: "multan_user", tag: "outlier", isBad: true },
+        ];
+
+        let cells = [];
+
+        function resizeCanvas() {
+          const rect = canvas.parentElement.getBoundingClientRect();
+          width = rect.width - 32;
+          height = 360;
+
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          canvas.style.width = width + 'px';
+          canvas.style.height = height + 'px';
+          ctx.scale(dpr, dpr);
+
+          initGridCells();
+        }
+
+        function initGridCells() {
+          const isMobile = width < 480;
+          const displayCount = isMobile ? 6 : 8;
+          const cols = isMobile ? 2 : 4;
+          const rows = Math.ceil(displayCount / cols);
+
+          const gridWidth = Math.min(width - 40, 440);
+          const gridHeight = 210;
+          const startX = (width - gridWidth) / 2;
+          const startY = 40;
+
+          const cellW = (gridWidth - (cols - 1) * 12) / cols;
+          const cellH = (gridHeight - (rows - 1) * 12) / rows;
+
+          cells = [];
+          for (let i = 0; i < displayCount; i++) {
+            const data = initialRawCells[i % initialRawCells.length];
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+
+            cells.push({
+              ...data,
+              col, row,
+              targetX: startX + col * (cellW + 12),
+              targetY: startY + row * (cellH + 12),
+              currX: -120 - (i * 40), // Offscreen left for ingest
+              currY: startY + row * (cellH + 12),
+              w: cellW,
+              h: cellH,
+              val: data.raw,
+              scanned: false,
+              detected: false,
+              linked: false,
+              fixed: false,
+              pulse: 0
+            });
+          }
+        }
+
+        // Loop Timing (Total ~12,000 ms)
+        let loopTime = 0;
+        let lastTimestamp = performance.now();
+        let frameCount = 0;
+        let fpsTimer = performance.now();
+
+        function renderStaticFrame() {
+          ctx.clearRect(0, 0, width, height);
+          ctx.fillStyle = '#090d1a';
+          ctx.fillRect(0, 0, width, height);
+
+          // Draw settled clean cells
+          cells.forEach((cell) => {
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(cell.targetX, cell.targetY, cell.w, cell.h, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText("✓ " + cell.fix, cell.targetX + cell.w / 2, cell.targetY + cell.h / 2);
+          });
+
+          if (statusLine) statusLine.textContent = "Pipeline Settled · All Fixes Verified";
+          if (qualityScoreElem) qualityScoreElem.textContent = "98%";
+        }
+
+        function drawLoop(now) {
+          const dt = Math.min((now - lastTimestamp), 50); // Delta-time cap
+          lastTimestamp = now;
+          loopTime = (loopTime + dt) % 12000;
+
+          // FPS calculation
+          frameCount++;
+          if (now - fpsTimer >= 1000) {
+            if (fpsDisplay) fpsDisplay.textContent = `${frameCount} FPS`;
+            frameCount = 0;
+            fpsTimer = now;
+          }
+
+          // Tilt smoothing
+          tiltX += (targetTiltX - tiltX) * 0.08;
+          tiltY += (targetTiltY - tiltY) * 0.08;
+
+          ctx.clearRect(0, 0, width, height);
+
+          ctx.save();
+          // Apply subtle 3D perspective tilt
+          ctx.translate(width / 2, height / 2);
+          ctx.transform(1, tiltY * 0.3, tiltX * 0.3, 1, 0, 0);
+          ctx.translate(-width / 2, -height / 2);
+
+          // Faint perspective floor grid
+          ctx.strokeStyle = 'rgba(0, 242, 254, 0.03)';
+          ctx.lineWidth = 1;
+          for (let y = 30; y < height; y += 24) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+          }
+
+          // Render Drifting Particles
+          particles.forEach(p => {
+            p.y -= p.speed * dt;
+            if (p.y < 0) p.y = 1;
+            const px = p.x * width;
+            const py = p.y * height;
+            ctx.fillStyle = `rgba(0, 242, 254, ${p.alpha})`;
+            ctx.beginPath();
+            ctx.arc(px, py, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // STAGE DETERMINATION
+          // 0 - 2500ms: Stage 1 - Ingest
+          // 2500 - 5000ms: Stage 2 - Scan
+          // 5000 - 7500ms: Stage 3 - Detect
+          // 7500 - 9500ms: Stage 4 - Link & Fix
+          // 9500 - 12000ms: Stage 5/6 - Quality Score & Settle
+
+          let currentStatus = "1. Ingesting records...";
+          let currentScore = 72;
+
+          if (loopTime > 2500 && loopTime <= 5000) {
+            currentStatus = "2. Scanning & profiling data...";
+            currentScore = 74;
+          } else if (loopTime > 5000 && loopTime <= 7500) {
+            currentStatus = "3. Duplicates & errors flagged: 5";
+            currentScore = 78;
+          } else if (loopTime > 7500 && loopTime <= 9500) {
+            currentStatus = "4. Proposed fixes · Confidence 0.91";
+            currentScore = 89;
+          } else if (loopTime > 9500) {
+            currentStatus = "5. Fixes applied · Awaiting approval";
+            currentScore = 98;
+          }
+
+          if (statusLine) statusLine.textContent = currentStatus;
+          if (qualityScoreElem) qualityScoreElem.textContent = `${currentScore}%`;
+
+          // Stage 1: Ingest Interpolation
+          cells.forEach((cell) => {
+            if (loopTime < 2200) {
+              const progress = Math.min(1, loopTime / 2000);
+              const ease = 1 - Math.pow(1 - progress, 3);
+              cell.currX += (cell.targetX - cell.currX) * 0.1;
+              cell.val = cell.raw;
+              cell.scanned = false;
+              cell.detected = false;
+              cell.linked = false;
+              cell.fixed = false;
+            } else {
+              cell.currX = cell.targetX;
+            }
+          });
+
+          // Stage 2: Sweep Scan Wave
+          let scanWaveX = -50;
+          if (loopTime >= 2200 && loopTime < 5000) {
+            const scanProgress = (loopTime - 2200) / 2600;
+            scanWaveX = scanProgress * (width + 100);
+          } else if (loopTime >= 5000) {
+            scanWaveX = width + 200;
+          }
+
+          // Stage 3 & 4 Flags
+          cells.forEach((cell) => {
+            if (cell.currX + cell.w < scanWaveX) cell.scanned = true;
+            if (loopTime >= 5000 && cell.isBad) cell.detected = true;
+            if (loopTime >= 7200 && cell.isBad) cell.linked = true;
+            if (loopTime >= 8500 && cell.isBad) {
+              cell.fixed = true;
+              cell.val = cell.fix;
+            }
+          });
+
+          // Draw Connections (Stage 4)
+          if (loopTime >= 7000 && loopTime < 11500) {
+            cells.forEach(cell => {
+              if (cell.linked && cell.matchWith !== undefined && cells[cell.matchWith]) {
+                const targetCell = cells[cell.matchWith];
+                const x1 = cell.currX + cell.w / 2;
+                const y1 = cell.currY + cell.h / 2;
+                const x2 = targetCell.currX + targetCell.w / 2;
+                const y2 = targetCell.currY + targetCell.h / 2;
+
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.quadraticCurveTo((x1 + x2) / 2, (y1 + y2) / 2 - 30, x2, y2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Traveling pulse dot
+                const travelProgress = ((loopTime % 1500) / 1500);
+                const dotX = (1 - travelProgress) * x1 + travelProgress * x2;
+                const dotY = (1 - travelProgress) * y1 + travelProgress * y2;
+                ctx.fillStyle = '#00f2fe';
+                ctx.beginPath();
+                ctx.arc(dotX, dotY, 3, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            });
+          }
+
+          // Render Data Cells
+          cells.forEach(cell => {
+            // Distance to cursor brightness check
+            const cx = cell.currX + cell.w / 2;
+            const cy = cell.currY + cell.h / 2;
+            const distToMouse = Math.hypot(mouseX - cx, mouseY - cy);
+            const isHovered = distToMouse < 70;
+
+            let bgColor = 'rgba(15, 23, 42, 0.8)';
+            let borderColor = 'rgba(255, 255, 255, 0.08)';
+            let textColor = '#cbd5e1';
+
+            if (cell.fixed) {
+              bgColor = 'rgba(16, 185, 129, 0.12)';
+              borderColor = '#10b981';
+              textColor = '#34d399';
+            } else if (cell.detected) {
+              bgColor = 'rgba(239, 68, 68, 0.15)';
+              borderColor = '#ef4444';
+              textColor = '#fca5a5';
+            } else if (cell.scanned) {
+              borderColor = 'rgba(0, 242, 254, 0.4)';
+            }
+
+            if (isHovered) {
+              borderColor = '#00f2fe';
+            }
+
+            // Cell Container Frame
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = cell.detected || cell.fixed || isHovered ? 1.5 : 1;
+
+            ctx.beginPath();
+            ctx.roundRect(cell.currX, cell.currY, cell.w, cell.h, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            // Confidence Progress Ring on Fix
+            if (loopTime >= 7800 && cell.isBad) {
+              const ringX = cell.currX + cell.w - 12;
+              const ringY = cell.currY + 12;
+              const fillAngle = Math.min(1, (loopTime - 7800) / 800) * Math.PI * 1.8;
+
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.arc(ringX, ringY, 6, 0, Math.PI * 2);
+              ctx.stroke();
+
+              ctx.strokeStyle = '#00f2fe';
+              ctx.beginPath();
+              ctx.arc(ringX, ringY, 6, -Math.PI / 2, -Math.PI / 2 + fillAngle);
+              ctx.stroke();
+            }
+
+            // Value Text Label
+            ctx.font = cell.val === "کراچی" ? '13px "Noto Nastaliq Urdu", serif' : '11px monospace';
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(cell.val, cell.currX + cell.w / 2, cell.currY + cell.h / 2);
+
+            // Floating Bad Tag (Stage 3)
+            if (cell.detected && !cell.fixed && cell.tag) {
+              ctx.fillStyle = '#ef4444';
+              ctx.font = '9px sans-serif';
+              ctx.fillText(cell.tag, cell.currX + cell.w / 2, cell.currY - 6);
+            }
+          });
+
+          // Draw Radial/Diagonal Scan Light Wave
+          if (loopTime >= 2200 && loopTime < 5000) {
+            const grad = ctx.createLinearGradient(scanWaveX - 40, 0, scanWaveX + 40, 0);
+            grad.addColorStop(0, 'rgba(0, 242, 254, 0)');
+            grad.addColorStop(0.5, 'rgba(0, 242, 254, 0.25)');
+            grad.addColorStop(1, 'rgba(0, 242, 254, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(scanWaveX - 40, 0, 80, height);
+          }
+
+          ctx.restore();
+
+          if (isTabActive && !isOffScreen) {
+            animationFrameId = requestAnimationFrame(drawLoop);
+          }
+        }
+
+        // Accessibility & Reduced Motion Listener
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        function startAnimation() {
+          if (prefersReducedMotion.matches) {
+            renderStaticFrame();
+            return;
+          }
+          if (!animationFrameId) {
+            lastTimestamp = performance.now();
+            animationFrameId = requestAnimationFrame(drawLoop);
+          }
+        }
+
+        function stopAnimation() {
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+          }
+        }
+
+        // IntersectionObserver (Pause off-screen)
+        const observer = new IntersectionObserver(([entry]) => {
+          isOffScreen = !entry.isIntersecting;
+          if (isOffScreen) stopAnimation();
+          else startAnimation();
+        }, { threshold: 0.1 });
+
+        observer.observe(canvas);
+
+        // Visibility Change Listener (Pause background tabs)
+        document.addEventListener('visibilitychange', () => {
+          isTabActive = !document.hidden;
+          if (isTabActive) startAnimation();
+          else stopAnimation();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        startAnimation();
+      }
+
+      /* --- 5. Hero Typing Effect --- */
+      const typingElem = document.getElementById('hero-typing');
+      const examples = ["karachi → Karachi", "03xx-xxxxxxx → +92 Standard", "کراچی ≈ Karachi (Fuzzy Match)", "Null Value → Imputed"];
+      let exIdx = 0, charIdx = 0, isDeleting = false;
+
+      function typeLoop() {
+        const current = examples[exIdx];
+        if (isDeleting) {
+          typingElem.textContent = current.substring(0, charIdx - 1);
+          charIdx--;
+        } else {
+          typingElem.textContent = current.substring(0, charIdx + 1);
+          charIdx++;
+        }
+
+        let speed = isDeleting ? 40 : 80;
+
+        if (!isDeleting && charIdx === current.length) {
+          speed = 2000;
+          isDeleting = true;
+        } else if (isDeleting && charIdx === 0) {
+          isDeleting = false;
+          exIdx = (exIdx + 1) % examples.length;
+          speed = 500;
+        }
+
+        setTimeout(typeLoop, speed);
+      }
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        typeLoop();
+      }
+
+      /* --- 6. Count-Up Animation Observer --- */
+      const counters = document.querySelectorAll('.count-up');
+      const observerOptions = { threshold: 0.5 };
+
+      const counterObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const target = +entry.target.getAttribute('data-target');
+            let count = 0;
+            const step = Math.ceil(target / 40);
+            const updateCount = () => {
+              count += step;
+              if (count >= target) {
+                entry.target.textContent = target;
+              } else {
+                entry.target.textContent = count;
+                setTimeout(updateCount, 30);
+              }
+            };
+            updateCount();
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      counters.forEach(c => counterObserver.observe(c));
+
+      /* --- 7. Before/After Interactive Slider --- */
+      const slider = document.getElementById('before-after-slider');
+      const beforeLayer = document.getElementById('before-layer');
+      if (slider && beforeLayer) {
+        slider.addEventListener('input', (e) => {
+          beforeLayer.style.width = e.target.value + '%';
+        });
+      }
+
+      /* --- 8. Product Interactive Demo State Engine --- */
+      const sampleDataset = [
+        { id: 101, name: "Usman Khan", city: "کراچی", phone: "03001234567", date: "2026-01-12", issue: "Urdu Script", fix: "Karachi", conf: 98, reason: "Mapped Nastaliq 'کراچی' to standardized English city name via phonetic model." },
+        { id: 102, name: "Ayesha Ali", city: "karachi", phone: "0300-1234567", date: "2026-01-12", issue: "Casing", fix: "Karachi", conf: 99, reason: "Titlecase formatting applied for proper noun city column." },
+        { id: 103, name: "Bilal Sheikh", city: "KHI", phone: "3001234567", date: "2026-01-13", issue: "Abbreviation", fix: "Karachi", conf: 95, reason: "Resolved IATA/local code 'KHI' to full canonical city entity." },
+        { id: 104, name: "Saima Raza", city: "Lahore", phone: "0321999999999", date: "2026-01-14", issue: "Digit Length", fix: "+92 321 9999999", conf: 92, reason: "Trimmed 2 extraneous trailing repeated digits." },
+        { id: 105, name: "Tariq Mahmood", city: "Islamabad", phone: "03335551234", date: "2026-01-14", issue: null },
+        { id: 106, name: "Fatima Noor", city: "Lahore", phone: "03001112223", date: "2026-01-15", issue: null },
+        { id: 107, name: "Zainab Malik", city: "Peshawar", phone: "03458889900", date: "2026-01-15", issue: null },
+        { id: 108, name: "Hamza Ahmed", city: "karachi", phone: "03124445566", date: "2026-01-16", issue: "Casing", fix: "Karachi", conf: 99, reason: "Standardized lowercase string to proper noun." },
+        { id: 109, name: "Omer Farooq", city: "Quetta", phone: "03007778899", date: "2026-01-16", issue: null },
+        { id: 110, name: "Mariam Baig", city: "Rawalpindi", phone: "03332221100", date: "2026-01-17", issue: null },
+        { id: 111, name: "Ali Raza", city: "Multan", phone: "03003334455", date: "2026-01-17", issue: null },
+        { id: 112, name: "Saad Imran", city: "Lahore", phone: "03215556677", date: "2026-01-18", issue: null }
+      ];
+
+      const tbody = document.getElementById('demo-tbody');
+      const proofPanel = document.getElementById('proof-content');
+      const proofStatus = document.getElementById('proof-status');
+
+      function renderTable() {
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        sampleDataset.forEach((row, idx) => {
+          const tr = document.createElement('tr');
+          tr.className = `cursor-pointer transition-colors ${row.issue ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-200' : 'hover:bg-slate-900/80 text-slate-300'}`;
+          tr.innerHTML = `
+            <td class="p-3">${row.id}</td>
+            <td class="p-3">${row.name}</td>
+            <td class="p-3 ${row.city === 'کراچی' ? 'font-urdu text-sm' : ''}">${row.city}</td>
+            <td class="p-3">${row.phone}</td>
+            <td class="p-3">${row.date}</td>
+          `;
+          tr.addEventListener('click', () => selectRow(idx));
+          tbody.appendChild(tr);
+        });
+      }
+
+      function selectRow(idx) {
+        const row = sampleDataset[idx];
+        if (!row.issue) {
+          proofStatus.textContent = 'Clean Record';
+          proofPanel.innerHTML = `
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+              ✓ Record #${row.id} passed all validation checks. No anomaly detected.
+            </div>
+          `;
+          return;
+        }
+
+        proofStatus.textContent = `Issue Flagged: ${row.issue}`;
+        proofPanel.innerHTML = `
+          <div class="space-y-3">
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Detected Flag</span>
+              <strong class="text-amber-400 font-semibold text-sm">${row.issue} Anomaly</strong>
+            </div>
+
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Confidence Score</span>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-full" style="width: ${row.conf}%"></div>
+                </div>
+                <span class="font-mono text-emerald-400 font-bold">${row.conf}%</span>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-slate-400 block text-[10px] uppercase">Plain-Language Proof</span>
+              <p class="text-slate-200 mt-0.5 leading-relaxed bg-slate-950 p-2.5 rounded-lg border border-slate-800">${row.reason}</p>
+            </div>
+
+            <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Current</span>
+                <span class="text-red-400 line-through font-mono">${row.city}</span>
+              </div>
+              <span class="text-slate-500">→</span>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Proposed Fix</span>
+                <span class="text-emerald-400 font-mono font-bold">${row.fix}</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <button onclick="approveFix(${idx})" class="w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-lg shadow-emerald-500/20">
+                Approve Fix
+              </button>
+              <button onclick="rejectFix(${idx})" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-all">
+                Reject
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      window.approveFix = function(idx) {
+        sampleDataset[idx].city = sampleDataset[idx].fix;
+        sampleDataset[idx].issue = null;
+        renderTable();
+        proofStatus.textContent = 'Fix Applied';
+        proofPanel.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center space-y-1">
+            <div class="font-bold">✓ Approved with Proof</div>
+            <div class="text-[11px] text-slate-300">Database updated. Audit trail recorded.</div>
+          </div>
+        `;
+        // Update score counter
+        const scoreElem = document.getElementById('stat-score');
+        const issueElem = document.getElementById('stat-issues');
+        if (scoreElem) scoreElem.textContent = '88%';
+        if (issueElem) issueElem.textContent = Math.max(0, parseInt(issueElem.textContent) - 1);
+      };
+
+      window.rejectFix = function(idx) {
+        sampleDataset[idx].issue = null;
+        renderTable();
+        proofStatus.textContent = 'Fix Rejected';
+        proofPanel.innerHTML = `
+          <div class="p-4 rounded-xl bg-slate-800 text-slate-300 text-center text-xs">
+            Proposal rejected. Original value retained by human override.
+          </div>
+        `;
+      };
+
+      // Initial Demo Render
+      renderTable();
+
+      // Scan Beam Trigger Button
+      const scanBtn = document.getElementById('btn-run-scan');
+      const scanBeam = document.getElementById('demo-scan-beam');
+      if (scanBtn && scanBeam) {
+        scanBtn.addEventListener('click', () => {
+          scanBeam.classList.remove('hidden');
+          scanBtn.textContent = 'Scanning...';
+          scanBtn.disabled = true;
+
+          setTimeout(() => {
+            scanBeam.classList.add('hidden');
+            scanBtn.textContent = 'Run Quality Scan';
+            scanBtn.disabled = false;
+            selectRow(0); // auto-open first issue
+          }, 2000);
+        });
+      }
+
+      /* --- 9. Demo 3-Tab Switcher --- */
+      const tabScanBtn = document.getElementById('tab-scan-btn');
+      const tabMonBtn = document.getElementById('tab-monitor-btn');
+      const tabRepBtn = document.getElementById('tab-report-btn');
+
+      const viewScan = document.getElementById('demo-view-scan');
+      const viewMon = document.getElementById('demo-view-monitor');
+      const viewRep = document.getElementById('demo-view-report');
+
+      function setActiveTab(btn, view) {
+        [tabScanBtn, tabMonBtn, tabRepBtn].forEach(b => {
+          b.className = 'px-5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-all';
+        });
+        btn.className = 'px-5 py-2 rounded-xl text-xs font-semibold transition-all bg-cyan-500 text-slate-950 shadow';
+
+        [viewScan, viewMon, viewRep].forEach(v => v.classList.add('hidden'));
+        view.classList.remove('hidden');
+      }
+
+      tabScanBtn.addEventListener('click', () => setActiveTab(tabScanBtn, viewScan));
+      tabMonBtn.addEventListener('click', () => setActiveTab(tabMonBtn, viewMon));
+      tabRepBtn.addEventListener('click', () => setActiveTab(tabRepBtn, viewRep));
+
+      /* --- 10. Formspree Inline Handler --- */
+      const contactForm = document.getElementById('contact-form');
+      const formSuccess = document.getElementById('form-success');
+      const formError = document.getElementById('form-error');
+
+      if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = new FormData(contactForm);
+          try {
+            const response = await fetch(contactForm.action, {
+              method: 'POST',
+              body: data,
+              headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+              formSuccess.classList.remove('hidden');
+              formError.classList.add('hidden');
+              contactForm.reset();
+            } else {
+              throw new Error();
+            }
+          } catch (err) {
+            formError.classList.remove('hidden');
+            formSuccess.classList.add('hidden');
+          }
+        });
+      }
+
+    });
+  </script>
+</body>
+</html>
