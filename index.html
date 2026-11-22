@@ -127,6 +127,13 @@
       animation: scanbeam 3s ease-in-out infinite alternate;
     }
 
+    /* Seamless marquee */
+    .marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+    .marquee-track { animation: marquee-scroll 30s linear infinite; will-change: transform; }
+    .marquee:hover .marquee-track { animation-play-state: paused; }
+    @keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
@@ -320,16 +327,27 @@
       </div>
     </section>
 
-    <!-- Marquee Strip -->
-    <div class="w-full bg-slate-900/50 border-y border-slate-800/80 py-4 overflow-hidden relative">
-      <div class="flex space-x-8 animate-[marquee_25s_linear_infinite] whitespace-nowrap text-xs uppercase font-mono tracking-widest text-slate-400">
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Fuzzy Duplicate Matching</span>
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Urdu Nastaliq Normalization</span>
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Schema Drift Detection</span>
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Statistical Outlier Profiling</span>
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Missing Value Imputation</span>
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Human-In-The-Loop Approval</span>
-        <span class="flex items-center gap-2"><span class="text-cyan-400">✦</span> Automated Proof Trails</span>
+    <!-- Marquee Strip (seamless loop) -->
+    <div class="marquee w-full bg-slate-900/50 border-y border-slate-800/80 py-4 overflow-hidden relative" aria-label="Data quality capabilities">
+      <div class="marquee-track flex w-max whitespace-nowrap text-xs uppercase font-mono tracking-widest text-slate-400">
+        <div class="flex shrink-0 items-center">
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Fuzzy Duplicate Matching</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Urdu Nastaliq Normalization</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Schema Drift Detection</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Statistical Outlier Profiling</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Missing Value Imputation</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Human-In-The-Loop Approval</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Automated Proof Trails</span>
+        </div>
+        <div class="flex shrink-0 items-center" aria-hidden="true">
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Fuzzy Duplicate Matching</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Urdu Nastaliq Normalization</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Schema Drift Detection</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Statistical Outlier Profiling</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Missing Value Imputation</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Human-In-The-Loop Approval</span>
+          <span class="flex items-center gap-2 mx-4"><span class="text-cyan-400">✦</span> Automated Proof Trails</span>
+        </div>
       </div>
     </div>
 
